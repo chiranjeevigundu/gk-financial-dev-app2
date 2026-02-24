@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useGlobal } from '../../context/GlobalContext';
 import { Save, Plus, Trash2, Layout, Megaphone, Phone } from 'lucide-react';
 import type { CMSConfig, FeatureButton } from '../../types';
@@ -8,7 +8,7 @@ export function AdminCMS() {
     const { cmsConfig, setCmsConfig } = useGlobal();
     const [formData, setFormData] = useState<CMSConfig>(cmsConfig);
     const [isDirty, setIsDirty] = useState(false);
-    const [activeTab, setActiveTab] = useState<'features' | 'sidebar' | 'contact'>('features');
+    const [activeTab, setActiveTab] = useState<'features' | 'sidebar' | 'contact' | 'theme'>('features');
 
     useEffect(() => {
         setFormData(cmsConfig);
@@ -86,12 +86,18 @@ export function AdminCMS() {
                     >
                         <Phone className="w-4 h-4" /> Contact Details
                     </button>
+                    <button
+                        onClick={() => setActiveTab('theme')}
+                        className={`flex items-center gap-2 px-6 py-4 font-bold transition-colors ${activeTab === 'theme' ? 'bg-slate-50 text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500 hover:bg-slate-50'}`}
+                    >
+                        <Layout className="w-4 h-4" /> Global Theme
+                    </button>
                 </div>
 
                 <div className="p-6">
                     {activeTab === 'features' && (
                         <div className="space-y-4">
-                            {formData.features.map((feat, idx) => (
+                            {formData.features.map((feat) => (
                                 <div key={feat.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 items-end">
                                     <div className="md:col-span-3">
                                         <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Label</label>
@@ -279,6 +285,56 @@ export function AdminCMS() {
                                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     placeholder="Brief history about the company and founder..."
                                 />
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'theme' && (
+                        <div className="space-y-8">
+                            <div>
+                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-1">Primary Color Palette</h3>
+                                <p className="text-xs text-slate-500 mb-4">Select the accent color that will be used across the entire user site.</p>
+
+                                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                                    {(['indigo', 'emerald', 'amber', 'rose', 'sky', 'violet'] as const).map(color => (
+                                        <button
+                                            key={color}
+                                            onClick={() => {
+                                                setFormData({ ...formData, theme: { ...formData.theme, primaryColor: color } });
+                                                setIsDirty(true);
+                                            }}
+                                            className={`h-24 rounded-2xl border-2 flex flex-col items-center justify-center transition-all ${formData.theme.primaryColor === color ? `border-${color}-500 bg-${color}-50 scale-105 shadow-md` : 'border-slate-200 hover:border-slate-300'}`}
+                                        >
+                                            <div className={`w-8 h-8 rounded-full mb-2 bg-${color}-500 shadow-sm`}></div>
+                                            <span className={`text-xs font-bold uppercase ${formData.theme.primaryColor === color ? `text-${color}-700` : 'text-slate-500'}`}>{color}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="border-t border-slate-200 pt-8">
+                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-1">UI Style Template</h3>
+                                <p className="text-xs text-slate-500 mb-4">Choose how cards and panels are rendered across the site.</p>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <button
+                                        onClick={() => { setFormData({ ...formData, theme: { ...formData.theme, style: 'glassmorphic' } }); setIsDirty(true); }}
+                                        className={`p-6 rounded-2xl border-2 text-left transition-all ${formData.theme.style === 'glassmorphic' ? 'border-indigo-500 bg-indigo-50 shadow-md scale-105' : 'border-slate-200 hover:border-slate-300'}`}
+                                    >
+                                        <div className="h-20 bg-gradient-to-br from-indigo-100 to-white rounded-xl mb-4 border border-indigo-50 shadow-sm backdrop-blur-sm"></div>
+                                        <h4 className="font-bold text-slate-800 mb-1">Glassmorphic 3D</h4>
+                                        <p className="text-xs text-slate-500 leading-relaxed">Premium blurs, abstract gradients, and heavy drop shadows for a modern feel.</p>
+                                    </button>
+
+                                    <button
+                                        onClick={() => { setFormData({ ...formData, theme: { ...formData.theme, style: 'minimal' } }); setIsDirty(true); }}
+                                        className={`p-6 rounded-2xl border-2 text-left transition-all ${formData.theme.style === 'minimal' ? 'border-indigo-500 bg-slate-50 shadow-md scale-105' : 'border-slate-200 hover:border-slate-300'}`}
+                                    >
+                                        <div className="h-20 bg-white rounded-xl mb-4 border border-slate-200 shadow-sm"></div>
+                                        <h4 className="font-bold text-slate-800 mb-1">Clean & Minimal</h4>
+                                        <p className="text-xs text-slate-500 leading-relaxed">Flat colors, subtle borders, and light shadows. Focus largely on data clarity.</p>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}

@@ -38,7 +38,6 @@ export function Header({ user, onLogin, onLogout }: HeaderProps) {
                     <nav className="hidden md:flex items-center gap-2">
                         {[
                             { to: '/', label: 'Home' },
-                            { to: '/chits', label: 'Chit Funds' },
                             { to: '/pf', label: 'Finance' },
                             { to: '/cc', label: 'Credit Card' },
                             { to: '/stocks', label: 'Trading' },
@@ -96,7 +95,6 @@ export function Header({ user, onLogin, onLogout }: HeaderProps) {
                         <nav className="flex flex-col gap-2">
                             {[
                                 { to: '/', label: 'Home' },
-                                { to: '/chits', label: 'Chit Funds' },
                                 { to: '/pf', label: 'Personal Finance' },
                                 { to: '/cc', label: 'Credit Card' },
                                 { to: '/stocks', label: 'Trading & Funds' },

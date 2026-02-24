@@ -5,7 +5,7 @@ import { LogIn, User, Lock, ArrowRight, Mail, Phone, ShieldCheck } from 'lucide-
 
 export function Login() {
     const navigate = useNavigate();
-    const { setUser } = useGlobal();
+    const { setUser, addUserRequest } = useGlobal();
     const [isRegistering, setIsRegistering] = useState(false);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
 
@@ -37,9 +37,22 @@ export function Login() {
 
     const handleRegister = (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock Register
-        alert('Registration successful! Please login.');
+        if (!regName || !regEmail || !regPhone) {
+            setLoginError('Please fill all fields');
+            return;
+        }
+        addUserRequest({
+            userId: '',
+            userName: regName,
+            type: 'Registration',
+            details: { email: regEmail, phone: regPhone }
+        });
+        alert('Registration request sent! Please wait for admin approval.');
         setIsRegistering(false);
+        setRegName('');
+        setRegEmail('');
+        setRegPhone('');
+        setLoginError('');
     };
 
     const handleForgotPassword = (e: React.FormEvent) => {

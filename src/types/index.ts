@@ -44,6 +44,8 @@ export type AuctionConfig = {
     roomCode: string;          // required to join & bid
     joinedUsers: number;       // derived
     joinedUsersList: Array<{ id: string; name: string }>;
+    activeBatchId?: string;    // ID of the batch currently being auctioned
+    activeBatchName?: string;  // Name of the batch currently being auctioned
 };
 
 export type AuctionState = {
@@ -92,7 +94,10 @@ export type UserChit = {
     installmentsPaid: number;
     currentMonthPayment?: number;
     currentMonthDividend?: number;
-    history: Array<{ month: string; amount: number; paidOn?: string; status: 'Paid' | 'Pending' | 'Overdue' }>;
+    bidsInHand?: number;
+    totalLoss?: number;
+    totalProfit?: number;
+    history: Array<{ month: string; amount: number; paidOn?: string; status: 'Paid' | 'Pending' | 'Overdue'; invoiceUrl?: string; receiptUrl?: string }>;
 };
 
 export type UserLoan = {
@@ -128,14 +133,30 @@ export type UserFinance = {
     deposits: UserDeposit[];
 };
 
+export type UserRequest = {
+    id: string;
+    userId?: string; // Optional for new user registrations
+    userName: string;
+    type: 'Join Chit' | 'New Loan' | 'New Deposit' | 'Forex' | 'Portfolio Update' | 'Registration' | 'Password Reset';
+    details: any; // Flexible object holding request-specific info
+    status: 'Pending' | 'Approved' | 'Rejected' | 'Completed';
+    date: string;
+    adminComment?: string;
+};
+
+// Kept for backward compatibility if needed, though we can migrate Forex to UserRequest.
 export type ForexRequest = {
     id: string;
     userId: string;
-    type: 'Buy' | 'Sell';
-    currency: string;
+    type?: 'Buy' | 'Sell';
+    currency?: string;
+    fromCurrency?: string;
+    toCurrency?: string;
+    name?: string;
     amount: number;
-    status: 'Pending' | 'Completed';
+    status: 'Pending' | 'Completed' | 'Approved' | 'Rejected';
     date: string;
+    adminComment?: string;
 };
 
 export type FeatureButton = {
@@ -161,9 +182,15 @@ export type ContactDetails = {
     mapUrl?: string;
 };
 
+export type CMSTheme = {
+    primaryColor: 'indigo' | 'emerald' | 'amber' | 'rose' | 'sky' | 'violet';
+    style: 'glassmorphic' | 'minimal' | '3d';
+};
+
 export type CMSConfig = {
     features: FeatureButton[];
     sidebar: SidebarContent;
     contact: ContactDetails;
     ticker: string; // Scroll/Marquee text
+    theme: CMSTheme; // Global styling preferences
 };

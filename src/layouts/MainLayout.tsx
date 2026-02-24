@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { Phone, Mail, MapPin, LogIn, Megaphone, Info, LogOut, Menu, X } from 'lucide-react';
+import { LogIn, Megaphone, LogOut, Menu, X } from 'lucide-react';
 import { useGlobal } from '../context/GlobalContext';
-import { logoSrc } from '../data/mockData';
 
 export function MainLayout() {
     const { user, setUser } = useGlobal();
@@ -24,14 +23,14 @@ export function MainLayout() {
             <header className="bg-white/90 backdrop-blur-md shadow-soft sticky top-0 z-50 border-b border-primary-100/50">
                 <div className="container mx-auto px-4 h-20 flex items-center justify-between relative z-10">
                     <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-12 h-12 bg-gradient-premium rounded-xl flex items-center justify-center text-white font-display font-bold text-xl shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform duration-300">
+                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-display font-bold text-xl shadow-lg shadow-emerald-500/30 group-hover:scale-105 transition-transform duration-300">
                             GK
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-2xl font-display font-black gradient-text-premium tracking-tight">
+                            <span className="text-2xl font-display font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-600 tracking-tight">
                                 GK Groups
                             </span>
-                            <span className="text-[10px] text-primary-600 font-bold tracking-widest uppercase">Financial Services</span>
+                            <span className="text-[10px] text-emerald-600 font-bold tracking-widest uppercase">Financial Services</span>
                         </div>
                     </Link>
 
@@ -40,10 +39,6 @@ export function MainLayout() {
                         <nav className="flex items-center gap-6">
                             <Link to="/" className="text-slate-600 hover:text-primary-600 font-bold transition-colors relative group">
                                 Home
-                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
-                            </Link>
-                            <Link to="/chits" className="text-slate-600 hover:text-primary-600 font-bold transition-colors relative group">
-                                Chit Funds
                                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-300 group-hover:w-full"></span>
                             </Link>
                             <Link to="/contact" className="text-slate-600 hover:text-primary-600 font-bold transition-colors relative group">
@@ -92,7 +87,6 @@ export function MainLayout() {
                 {mobileMenuOpen && (
                     <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-lg py-4 px-4 flex flex-col gap-4 animate-fade-in z-50">
                         <Link to="/" className="text-slate-600 font-bold py-2" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-                        <Link to="/chits" className="text-slate-600 font-bold py-2" onClick={() => setMobileMenuOpen(false)}>Chit Funds</Link>
                         <Link to="/contact" className="text-slate-600 font-bold py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
                         {user ? (
                             <button onClick={handleLogout} className="text-red-600 font-bold py-2 text-left">Logout</button>
@@ -112,27 +106,27 @@ export function MainLayout() {
                 {/* Right Sidebar */}
                 <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0">
                     {/* Advertisements */}
-                    <div className="bg-gradient-premium rounded-3xl shadow-premium p-8 text-white relative overflow-hidden group">
+                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl shadow-2xl shadow-indigo-500/30 p-8 text-white relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/20 transition-all duration-700"></div>
-                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary-500/30 rounded-full -ml-16 -mb-16 blur-2xl"></div>
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-400/20 rounded-full -ml-16 -mb-16 blur-2xl"></div>
 
                         <div className="relative z-10">
                             <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold mb-4 border border-white/10">
                                 Limited Time
                             </div>
                             <h3 className="font-display font-black text-2xl mb-2">Special Offer!</h3>
-                            <p className="text-primary-50 text-sm mb-6 font-medium leading-relaxed">
-                                Get <span className="text-secondary-300 font-bold">0% processing fee</span> on Personal Loans this month.
+                            <p className="text-indigo-50 text-sm mb-6 font-medium leading-relaxed">
+                                Get <span className="text-yellow-300 font-bold">0% processing fee</span> on Personal Loans this month.
                             </p>
-                            <button className="w-full py-3 bg-white text-primary-700 rounded-xl text-sm font-bold shadow-lg hover:bg-primary-50 transition-colors transform hover:-translate-y-1">
+                            <button className="w-full py-3 bg-white text-indigo-700 rounded-xl text-sm font-bold shadow-lg hover:bg-indigo-50 transition-colors transform hover:-translate-y-1">
                                 Apply Now
                             </button>
                         </div>
                     </div>
 
                     {/* Announcements */}
-                    <div className="card-glass p-6">
-                        <div className="flex items-center gap-2 mb-6 text-secondary-600 font-bold uppercase tracking-wider text-xs">
+                    <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6">
+                        <div className="flex items-center gap-2 mb-6 text-indigo-600 font-bold uppercase tracking-wider text-xs">
                             <Megaphone className="w-4 h-4" />
                             Latest Updates
                         </div>

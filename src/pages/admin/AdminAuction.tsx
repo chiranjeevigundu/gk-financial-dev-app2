@@ -1,16 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useGlobal } from '../../context/GlobalContext';
 import { Save, RefreshCw, Play, Square, History } from 'lucide-react';
 import type { AuctionConfig } from '../../types';
 
 export function AdminAuction() {
-    const { auctionConfig, setAuctionConfig, auctionState, setAuctionState, pfLive } = useGlobal();
+    const { auctionConfig, setAuctionConfig, auctionState, setAuctionState, batches, syncAuctionResults } = useGlobal();
     const [formData, setFormData] = useState<AuctionConfig>(auctionConfig);
     const [isDirty, setIsDirty] = useState(false);
+
+    // Editable Results State
+    const [editableResults, setEditableResults] = useState<{
+        finalLoss: number;
+        dividend: number;
+        monthlyPayment: number;
+    }>({ finalLoss: 0, dividend: 0, monthlyPayment: 0 });
 
     useEffect(() => {
         setFormData(auctionConfig);
     }, [auctionConfig]);
+
+    useEffect(() => {
+        if (auctionState.finished && auctionState.winner) {
+            const { finalLoss } = auctionState.winner;
+            // dividend roughly finalLoss / total active users. We don't have distinct users directly here, but we can default to chitValue / term roughly or let admin set it.
+            // A simple default: 
+            const defaultDividend = Math.floor(finalLoss / formData.term);
+            const defaultMonthly = formData.chitValue / formData.term - defaultDividend;
+
+            setEditableResults({
+                finalLoss,
+                dividend: defaultDividend,
+                monthlyPayment: defaultMonthly
+            });
+        }
+    }, [auctionState.finished, auctionState.winner, formData.term, formData.chitValue]);
 
     const handleChange = (key: keyof AuctionConfig, value: any) => {
         setFormData(prev => ({ ...prev, [key]: value }));
@@ -99,6 +122,25 @@ export function AdminAuction() {
                 {/* Basic Settings */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <h3 className="font-bold text-slate-900 border-b pb-2 mb-4">Basic Settings</h3>
+
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Active Batch</label>
+                        <select
+                            value={formData.activeBatchId || ''}
+                            onChange={e => {
+                                const bid = e.target.value;
+                                const bName = batches.find(b => b.id === bid)?.name || '';
+                                setFormData(prev => ({ ...prev, activeBatchId: bid, activeBatchName: bName }));
+                                setIsDirty(true);
+                            }}
+                            className="w-full font-bold text-indigo-700 border-b border-slate-200 focus:border-indigo-500 outline-none pb-1 mb-4 bg-transparent"
+                        >
+                            <option value="">-- Select Batch --</option>
+                            {batches.map(b => (
+                                <option key={b.id} value={b.id}>{b.name} ({b.id})</option>
+                            ))}
+                        </select>
+                    </div>
 
                     <div>
                         <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Auction Date</label>
@@ -198,30 +240,72 @@ export function AdminAuction() {
                     <History className="w-5 h-5 text-indigo-600" /> Auction Results (Automation)
                 </h3>
                 {auctionState.finished ? (
-                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
-                        <div className="flex items-center gap-3 mb-2">
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+                        <div className="flex items-center gap-3 mb-6">
                             <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
                                 ✓
                             </div>
                             <div>
-                                <h4 className="font-bold text-emerald-900">Auction Finalized</h4>
-                                <p className="text-xs text-emerald-700">Values have been saved to Personal Finance records.</p>
+                                <h4 className="font-bold text-slate-900">Auction Finalized</h4>
+                                <p className="text-xs text-slate-500">Review final values before syncing to user ledgers.</p>
                             </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
-                            <div>
-                                <div className="text-slate-500">Winner</div>
-                                <div className="font-bold">{auctionState.winner?.name || 'None'}</div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                            <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                <div className="text-xs font-bold text-slate-500 uppercase mb-1">Winner</div>
+                                <div className="font-bold text-slate-800">{auctionState.winner?.name || 'None'}</div>
+                                <div className="text-[10px] font-mono text-slate-400">{auctionState.winner?.userId}</div>
                             </div>
-                            <div>
-                                <div className="text-slate-500">Winning Bid</div>
-                                <div className="font-bold">₹ {auctionState.winner?.winnerLoss.toLocaleString()}</div>
+
+                            <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Final Loss (₹)</label>
+                                <input
+                                    type="number"
+                                    value={editableResults.finalLoss}
+                                    onChange={e => setEditableResults({ ...editableResults, finalLoss: Number(e.target.value) })}
+                                    className="w-full font-bold text-rose-500 outline-none border-b border-rose-200 focus:border-rose-500"
+                                />
                             </div>
-                            <div>
-                                <div className="text-slate-500">Total Loss (Comm + Bid)</div>
-                                <div className="font-bold text-red-600">₹ {auctionState.winner?.finalLoss.toLocaleString()}</div>
+
+                            <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Dividend / User (₹)</label>
+                                <input
+                                    type="number"
+                                    value={editableResults.dividend}
+                                    onChange={e => setEditableResults({ ...editableResults, dividend: Number(e.target.value) })}
+                                    className="w-full font-bold text-emerald-600 outline-none border-b border-emerald-200 focus:border-emerald-500"
+                                />
+                            </div>
+
+                            <div className="bg-white p-3 rounded-lg border border-slate-200">
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">New Monthly EMI (₹)</label>
+                                <input
+                                    type="number"
+                                    value={editableResults.monthlyPayment}
+                                    onChange={e => setEditableResults({ ...editableResults, monthlyPayment: Number(e.target.value) })}
+                                    className="w-full font-bold text-indigo-600 outline-none border-b border-indigo-200 focus:border-indigo-500"
+                                />
                             </div>
                         </div>
+
+                        <button
+                            onClick={() => {
+                                if (confirm('Are you sure you want to sync these results to all active users in this batch? This will add history rows and update ledgers.')) {
+                                    syncAuctionResults(formData.activeBatchId || '', {
+                                        finalLoss: editableResults.finalLoss,
+                                        dividend: editableResults.dividend,
+                                        monthlyPayment: editableResults.monthlyPayment,
+                                        winnerId: auctionState.winner?.userId,
+                                        runningMonth: formData.runningMonth
+                                    });
+                                    alert('Results synchronized to user ledgers successfully!');
+                                }
+                            }}
+                            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2"
+                        >
+                            <Save className="w-5 h-5" /> Send to Users (Save & Sync)
+                        </button>
                     </div>
                 ) : (
                     <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">

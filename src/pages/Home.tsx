@@ -2,8 +2,6 @@ import React from 'react';
 import { useGlobal } from '../context/GlobalContext';
 import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { Phone } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
 
 export function Home() {
     const { cmsConfig } = useGlobal();
@@ -29,79 +27,58 @@ export function Home() {
                 </div>
             )}
 
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="max-w-5xl mx-auto px-4 py-16 flex items-center justify-center min-h-[80vh]">
+                {/* Center: Dashboard Features Container (Half Screen width) */}
+                <div className="w-full bg-white rounded-[2rem] p-8 md:p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+                    {/* Decorative Background Elements */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-50 rounded-full blur-3xl -ml-32 -mb-32 opacity-50 pointer-events-none"></div>
 
-                    {/* Left/Center: Feature Grid (3 cols wide) */}
-                    <div className="lg:col-span-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            {cmsConfig.features.map((feat) => (
+                    <h2 className="text-3xl font-black text-slate-800 text-center mb-12 relative z-10 tracking-wide">Access Your Services</h2>
+
+                    {/* 4 options in one row, 4 in the next (Grid cols 4) */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 relative z-10 place-items-center">
+                        {cmsConfig.features.map((feat) => {
+                            // Full classes so Tailwind JIT compiles them correctly
+                            const colorGradMap: Record<string, string> = {
+                                'bg-indigo-600': 'from-indigo-400 to-indigo-600 shadow-indigo-500/40 border-indigo-300/30',
+                                'bg-emerald-600': 'from-emerald-400 to-emerald-600 shadow-emerald-500/40 border-emerald-300/30',
+                                'bg-purple-600': 'from-purple-400 to-purple-600 shadow-purple-500/40 border-purple-300/30',
+                                'bg-amber-600': 'from-amber-400 to-amber-600 shadow-amber-500/40 border-amber-300/30',
+                                'bg-rose-600': 'from-rose-400 to-rose-600 shadow-rose-500/40 border-rose-300/30',
+                                'bg-sky-600': 'from-sky-400 to-sky-600 shadow-sky-500/40 border-sky-300/30',
+                                'bg-teal-600': 'from-teal-400 to-teal-600 shadow-teal-500/40 border-teal-300/30',
+                                'bg-blue-600': 'from-blue-400 to-blue-600 shadow-blue-500/40 border-blue-300/30',
+                            };
+                            const gradientClasses = colorGradMap[feat.color] || 'from-slate-400 to-slate-600 shadow-slate-500/40 border-slate-300/30';
+
+                            return (
                                 <Link
                                     key={feat.id}
                                     to={feat.path}
-                                    className="group bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col items-center text-center hover:-translate-y-1 relative overflow-hidden"
+                                    className="group flex flex-col items-center gap-5 w-full outline-none"
                                 >
-                                    <div className={`w-14 h-14 rounded-xl ${feat.color} text-white flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                        <DynamicIcon name={feat.icon} className="w-7 h-7" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-2">{feat.label}</h3>
-                                    <div className="flex items-center gap-1 text-sm font-bold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                                        Explore Service <Icons.ArrowRight className="w-4 h-4" />
+                                    {/* Colorful Graphic Circle */}
+                                    <div className={`w-28 h-28 md:w-32 md:h-32 rounded-full shadow-lg ${gradientClasses} bg-gradient-to-br flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300 transform group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-2xl cursor-pointer ring-4 ring-transparent group-focus:ring-indigo-300 border`}>
+
+                                        {/* Abstract Graphic Overlays (Gloss & depth) */}
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/30 rounded-full blur-2xl -mr-6 -mt-6 transition-transform duration-500 group-hover:scale-150"></div>
+                                        <div className="absolute bottom-0 left-0 w-16 h-16 bg-black/10 rounded-full blur-xl -ml-4 -mb-4 transition-transform duration-500 group-hover:scale-150"></div>
+
+                                        {/* Icon */}
+                                        <DynamicIcon name={feat.icon} className="w-12 h-12 md:w-14 md:h-14 text-white relative z-10 drop-shadow-md transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110" />
+
+                                        {/* Shimmer Effect */}
+                                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none z-20"></div>
                                     </div>
 
-                                    {/* Hover Gradient */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-slate-50/0 group-hover:from-indigo-50/30 group-hover:to-indigo-100/30 transition-all duration-300 pointer-events-none" />
+                                    {/* Label Text */}
+                                    <span className="text-center font-bold text-slate-700 text-sm md:text-base leading-tight tracking-wide group-hover:text-indigo-600 transition-colors">
+                                        {feat.label}
+                                    </span>
                                 </Link>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Right Sidebar: Ads & Announcements (1 col wide) */}
-                    <div className="space-y-8">
-                        {/* Advertising */}
-                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100 shadow-sm relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                            <h3 className="font-bold text-amber-800 mb-4 flex items-center gap-2">
-                                <Icons.Zap className="w-5 h-5" /> Special Offers
-                            </h3>
-
-                            {/* Ad Media (Image/Video) */}
-                            {cmsConfig.sidebar.adMediaUrl && (
-                                <div className="mb-4 rounded-xl overflow-hidden shadow-sm">
-                                    <img
-                                        src={cmsConfig.sidebar.adMediaUrl}
-                                        alt="Special Offer"
-                                        className="w-full h-auto object-cover"
-                                        onError={(e) => {
-                                            // Fallback if image fails or if it's a video URL (basic handling)
-                                            (e.target as HTMLImageElement).style.display = 'none';
-                                        }}
-                                    />
-                                </div>
-                            )}
-
-                            <div className="prose prose-sm prose-amber">
-                                <ReactMarkdown>{cmsConfig.sidebar.ads}</ReactMarkdown>
-                            </div>
-                        </div>
-
-                        {/* Announcements */}
-                        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <Icons.Bell className="w-5 h-5 text-indigo-600" /> Announcements
-                            </h3>
-                            <div className="prose prose-sm prose-slate">
-                                <ReactMarkdown>{cmsConfig.sidebar.announcements}</ReactMarkdown>
-                            </div>
-                        </div>
-
-                        {/* Contact Button */}
-                        <Link
-                            to="/contact"
-                            className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 transition-transform hover:scale-[1.02] flex items-center justify-center gap-2"
-                        >
-                            <Phone className="w-5 h-5" /> Contact Us
-                        </Link>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

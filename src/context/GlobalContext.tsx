@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { UserLite, AdminUser, AuctionConfig, AuctionState, PFMonthRow, ChitBatch, UserFinance, ForexRequest, CMSConfig } from '../types';
+import type { UserLite, AdminUser, AuctionConfig, AuctionState, PFMonthRow, ChitBatch, UserFinance, ForexRequest, CMSConfig, UserRequest } from '../types';
 
 interface GlobalContextType {
     // User state
@@ -38,15 +38,20 @@ interface GlobalContextType {
     allUserFinances: Record<string, UserFinance>; // Master record
     updateUserFinance: (userId: string, data: UserFinance) => void;
 
-    // Forex Data
+    // Requests
     forexRequests: ForexRequest[];
     addForexRequest: (req: Omit<ForexRequest, 'id' | 'status' | 'date' | 'userId'>) => void;
+    userRequests: UserRequest[];
+    addUserRequest: (req: Omit<UserRequest, 'id' | 'status' | 'date'>) => void;
+    updateUserRequest: (id: string, data: Partial<UserRequest>) => void;
     // Login Modal State
     showLoginModal: boolean;
     setShowLoginModal: React.Dispatch<React.SetStateAction<boolean>>;
-    // Finalize function
+
+    // Misc
     finalizeAuction: () => void;
     canBid: (userId: string, batchId: string) => boolean;
+    syncAuctionResults: (batchId: string, resultData: { finalLoss: number, dividend: number, monthlyPayment: number, winnerId?: string, runningMonth: string }) => void;
     // CMS Config
     cmsConfig: CMSConfig;
     setCmsConfig: React.Dispatch<React.SetStateAction<CMSConfig>>;
@@ -85,11 +90,14 @@ const INITIAL_FINANCE: Record<string, UserFinance> = {
 
 const INITIAL_CMS_CONFIG: CMSConfig = {
     features: [
-        { id: '1', label: 'Chit Funds', icon: 'Banknote', path: '/chits', color: 'bg-indigo-600' },
-        { id: '2', label: 'Personal Loans', icon: 'Banknote', path: '/loans', color: 'bg-emerald-600' },
-        { id: '3', label: 'Credit Cards', icon: 'CreditCard', path: '/credit-cards', color: 'bg-purple-600' },
-        { id: '4', label: 'Stock Market', icon: 'TrendingUp', path: '/stocks', color: 'bg-amber-600' },
-        { id: '5', label: 'Forex', icon: 'RefreshCcw', path: '/forex', color: 'bg-rose-600' },
+        { id: '1', label: 'Live Auction', icon: 'Gavel', path: '/chits', color: 'bg-indigo-600' },
+        { id: '2', label: 'Chit Details', icon: 'List', path: '/chit-details', color: 'bg-emerald-600' },
+        { id: '3', label: 'Monthly Payments', icon: 'Calendar', path: '/payments', color: 'bg-teal-600' },
+        { id: '4', label: 'Personal Loans', icon: 'Banknotes', path: '/loans', color: 'bg-amber-600' },
+        { id: '5', label: 'Credit Cards', icon: 'CreditCard', path: '/credit-cards', color: 'bg-purple-600' },
+        { id: '6', label: 'Stock Market', icon: 'TrendingUp', path: '/stocks', color: 'bg-sky-600' },
+        { id: '7', label: 'Forex', icon: 'RefreshCw', path: '/forex', color: 'bg-rose-600' },
+        { id: '8', label: 'Personal Portfolio', icon: 'PieChart', path: '/portfolio', color: 'bg-blue-600' },
     ],
     sidebar: {
         ads: '### Special Offer!\nGet 50% off on processing fees for new personal loans this month only.',
@@ -103,7 +111,11 @@ const INITIAL_CMS_CONFIG: CMSConfig = {
         email: 'support@gkgroups.com',
         about: 'GK Groups has been a trusted financial partner since 1993. Founded by Visionary Leader, we are committed to providing secure and reliable financial services to help you grow your wealth.'
     },
-    ticker: 'Welcome to GK Groups - Your Trusted Financial Partner Since 1993'
+    ticker: 'Welcome to GK Groups - Your Trusted Financial Partner Since 1993',
+    theme: {
+        primaryColor: 'indigo',
+        style: 'glassmorphic'
+    }
 };
 
 export function GlobalProvider({ children }: { children: ReactNode }) {
@@ -131,7 +143,8 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
     const [auctionConfig, setAuctionConfig] = useState<AuctionConfig>(() => getStored('gk_auctionConfig', {
         dateMonth: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
         startMonth: 'Jan', endMonth: 'Dec', runningMonth: 'Nov', term: 24, chitValue: 600000, lastBid: 0, commissionRate: 5, minLoss: 30000, monthlyPayment: 0,
-        ticker: 'Welcome to GK Groups Chit Auction • Next batch opens at 4:30 PM', roomCode: 'GK-123456', joinedUsers: 0, joinedUsersList: INITIAL_USERS
+        ticker: 'Welcome to GK Groups Chit Auction • Next batch opens at 4:30 PM', roomCode: 'GK-123456', joinedUsers: 0, joinedUsersList: INITIAL_USERS,
+        activeBatchId: 'GK-A1', activeBatchName: 'Alpha Batch'
     }));
 
     const [auctionState, setAuctionState] = useState<AuctionState>(() => getStored('gk_auctionState', {
@@ -146,7 +159,16 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 
     const [pfLive, setPfLive] = useState<Record<string, PFMonthRow>>({});
     const [forexRequests, setForexRequests] = useState<ForexRequest[]>([]);
-    const [cmsConfig, setCmsConfig] = useState<CMSConfig>(() => getStored('gk_cmsConfig', INITIAL_CMS_CONFIG));
+    const [userRequests, setUserRequests] = useState<UserRequest[]>(() => getStored('gk_userRequests', []));
+    const [cmsConfig, setCmsConfig] = useState<CMSConfig>(() => {
+        // Always force reset features array to ensure the user gets the updated layout pipeline
+        const stored = getStored('gk_cmsConfig', INITIAL_CMS_CONFIG);
+        return {
+            ...stored,
+            features: INITIAL_CMS_CONFIG.features,
+            theme: stored.theme || INITIAL_CMS_CONFIG.theme
+        };
+    });
 
     // --- SYNC EFFECTS ---
     useEffect(() => { setStored('gk_adminUser', adminUser); }, [adminUser]);
@@ -156,6 +178,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
     useEffect(() => { setStored('gk_allUserFinances', allUserFinances); }, [allUserFinances]);
     useEffect(() => { setStored('gk_batches', batches); }, [batches]);
     useEffect(() => { setStored('gk_cmsConfig', cmsConfig); }, [cmsConfig]);
+    useEffect(() => { setStored('gk_userRequests', userRequests); }, [userRequests]);
 
     // Listen for storage events (Cross-Tab Sync)
     useEffect(() => {
@@ -165,6 +188,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
             if (e.key === 'gk_allUsers' && e.newValue) setAllUsers(JSON.parse(e.newValue));
             if (e.key === 'gk_allUserFinances' && e.newValue) setAllUserFinances(JSON.parse(e.newValue));
             if (e.key === 'gk_cmsConfig' && e.newValue) setCmsConfig(JSON.parse(e.newValue));
+            if (e.key === 'gk_userRequests' && e.newValue) setUserRequests(JSON.parse(e.newValue));
         };
         window.addEventListener('storage', handleStorage);
         return () => window.removeEventListener('storage', handleStorage);
@@ -226,6 +250,20 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
         setForexRequests(prev => [newReq, ...prev]);
     };
 
+    const addUserRequest = (req: Omit<UserRequest, 'id' | 'status' | 'date'>) => {
+        const newReq: UserRequest = {
+            ...req,
+            id: `REQ-${Date.now()}`,
+            status: 'Pending',
+            date: new Date().toLocaleDateString()
+        };
+        setUserRequests(prev => [newReq, ...prev]);
+    };
+
+    const updateUserRequest = (id: string, data: Partial<UserRequest>) => {
+        setUserRequests(prev => prev.map(r => r.id === id ? { ...r, ...data } : r));
+    };
+
     const addUser = (u: UserLite) => setAllUsers(prev => [...prev, u]);
     const updateUser = (id: string, data: Partial<UserLite>) => setAllUsers(prev => prev.map(u => u.id === id ? { ...u, ...data } : u));
     const deleteUser = (id: string) => setAllUsers(prev => prev.filter(u => u.id !== id));
@@ -234,9 +272,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
     const updateBatch = (id: string, data: Partial<ChitBatch>) => setBatches(prev => prev.map(b => b.id === id ? { ...b, ...data } : b));
     const deleteBatch = (id: string) => setBatches(prev => prev.filter(b => b.id !== id));
 
-    const updateUserFinance = (userId: string, data: UserFinance) => {
-        setAllUserFinances(prev => ({ ...prev, [userId]: data }));
-    };
+    const updateUserFinance = (userId: string, data: UserFinance) => setAllUserFinances(prev => ({ ...prev, [userId]: data }));
 
     function finalizeAuction() {
         setAuctionState(prev => {
@@ -251,6 +287,70 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
         });
     }
 
+    const syncAuctionResults = (batchId: string, resultData: { finalLoss: number, dividend: number, monthlyPayment: number, winnerId?: string, runningMonth: string }) => {
+        // 1. Advance the batch month (optional simple implementation, relying on the admin to set the new 'currentMonth' in batch if needed)
+        // Here we can just record it in the history of the chits.
+
+        // 2. Update all users participating in this batch
+        setAllUserFinances(prevStore => {
+            const nextStore = { ...prevStore };
+
+            Object.keys(nextStore).forEach(userId => {
+                const userFin = nextStore[userId];
+                const chitIndex = userFin.chits.findIndex(c => c.batchId === batchId && c.status === 'Active');
+
+                if (chitIndex !== -1) {
+                    const chit = { ...userFin.chits[chitIndex] };
+
+                    // Add history row
+                    const newHistoryRow = {
+                        month: resultData.runningMonth,
+                        amount: resultData.monthlyPayment,
+                        status: 'Pending' as const
+                    };
+                    chit.history = [...chit.history, newHistoryRow];
+
+                    // Add dividend to total profit
+                    chit.totalProfit = (chit.totalProfit || 0) + resultData.dividend;
+
+                    // Update current stats based on the new sync
+                    chit.currentMonthPayment = resultData.monthlyPayment;
+                    chit.currentMonthDividend = resultData.dividend;
+                    chit.pendingAmount = (chit.pendingAmount || 0) + resultData.monthlyPayment;
+
+                    // If this user is the winner
+                    if (userId === resultData.winnerId) {
+                        chit.bidWon = true;
+                        chit.bidMonth = resultData.runningMonth;
+                        chit.bidAmount = resultData.finalLoss;
+                        chit.bidsInHand = (chit.bidsInHand || 1) - 1;
+                        chit.totalLoss = resultData.finalLoss;
+                    } else if (!chit.bidWon) {
+                        // Everyone else who hasn't won still has a bid in hand
+                        chit.bidsInHand = 1;
+                    }
+
+                    // Save chit back to user
+                    const updatedChits = [...userFin.chits];
+                    updatedChits[chitIndex] = chit;
+                    nextStore[userId] = { ...userFin, chits: updatedChits };
+                }
+            });
+
+            return nextStore;
+        });
+
+        // 3. Reset Auction State
+        setAuctionState({
+            secondsLeft: 600,
+            endTime: undefined,
+            running: false,
+            finished: false,
+            currentLoss: Math.floor(auctionConfig.chitValue * (auctionConfig.commissionRate / 100)),
+            bidders: [],
+        });
+    };
+
     // Auto finalize
     useEffect(() => {
         if (auctionState.secondsLeft === 0 && !auctionState.finished) finalizeAuction();
@@ -258,6 +358,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
 
     // Validation: Can user bid?
     const canBid = (userId: string, batchId: string): boolean => {
+        if (adminUser || userId.startsWith('ADMIN')) return true;
         const userFin = allUserFinances[userId];
         if (!userFin) return false;
         // Check if user has a chit in this batch and it's active
@@ -276,8 +377,9 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
             allUsers, addUser, updateUser, deleteUser,
             addBatch, updateBatch, deleteBatch,
             userFinance, allUserFinances, updateUserFinance,
-            forexRequests, addForexRequest, finalizeAuction, canBid,
-            cmsConfig, setCmsConfig
+            forexRequests, addForexRequest, finalizeAuction, syncAuctionResults, canBid,
+            cmsConfig, setCmsConfig,
+            userRequests, addUserRequest, updateUserRequest
         }}>
             {children}
         </GlobalContext.Provider>

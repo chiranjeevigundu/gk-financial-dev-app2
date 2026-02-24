@@ -1,19 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useGlobal } from '../context/GlobalContext';
 
 export function TimerDigits() {
-    const [, setTick] = useState(0);
-    const [seconds, setSeconds] = useState<number>(600);
-
-    useEffect(() => {
-        const handler = () => {
-            const s = (window as any).__gk_secondsLeft ?? 600;
-            setSeconds(s);
-            setTick(x => x + 1);
-        };
-        window.addEventListener('gk:tick', handler as any);
-        handler();
-        return () => window.removeEventListener('gk:tick', handler as any);
-    }, []);
+    const { auctionState } = useGlobal();
+    const seconds = auctionState.secondsLeft;
 
     const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
     const ss = String(seconds % 60).padStart(2, '0');
