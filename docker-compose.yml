@@ -1,7 +1,13 @@
 services:
   gk-app:
     build: .
-    ports:
-      - "8080:80"
     restart: always
     container_name: gk-groups-app
+    # No need to expose ports to the public internet, Cloudflare handles it internally
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
