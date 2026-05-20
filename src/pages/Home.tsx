@@ -33,7 +33,7 @@ export function Home() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-50 rounded-full blur-3xl -ml-32 -mb-32 opacity-50 pointer-events-none"></div>
 
-                    <h2 className="text-3xl font-black text-slate-800 text-center mb-12 relative z-10 tracking-wide">Access Your Services (Active)</h2>
+                    <h2 className="text-3xl font-black text-slate-800 text-center mb-12 relative z-10 tracking-wide">Access Your Services (V2)</h2>
 
                     {/* 4 options in one row, 4 in the next (Grid cols 4) */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 relative z-10 place-items-center">
