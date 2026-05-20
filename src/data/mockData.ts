@@ -1,11 +1,10 @@
-import type { UserFinance } from '../types';
 
 // ===== Logo handling =====
 export const LOGO_URL = "/gk_groups_logo_1763895416033.png";
 export const logoSrc = LOGO_URL;
 
 // ===== Mock Users DB (for demo auth) =====
-export const DEMO_USERS: Record<string, UserFinance> = {
+export const DEMO_USERS: Record<string, any> = {
     GK2025_0012: {
         personal: { userId: 'GK2025-0012', contact: '+91-9999999999', altContact: '+91-8888888888', home: '123 MG Road, Hyderabad, TS', office: 'GK Groups HQ, Banjara Hills, Hyderabad', name: 'Ravi Kumar' },
         chits: [

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useGlobal } from '../context/GlobalContext';
 import { MapPin, Phone, Mail, Building2, User } from 'lucide-react';
 

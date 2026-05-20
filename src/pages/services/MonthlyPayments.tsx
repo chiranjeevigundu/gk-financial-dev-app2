@@ -1,7 +1,6 @@
-import React from 'react';
 import { useGlobal } from '../../context/GlobalContext';
 import { formatINR } from '../../utils/helpers';
-import { Calendar, ReceiptText, Download, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { ReceiptText, Download, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 export function MonthlyPayments() {
     const { userFinance, auctionConfig } = useGlobal();

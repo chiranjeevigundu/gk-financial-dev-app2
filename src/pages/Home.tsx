@@ -1,4 +1,3 @@
-import React from 'react';
 import { useGlobal } from '../context/GlobalContext';
 import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';

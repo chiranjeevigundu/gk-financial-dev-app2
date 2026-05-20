@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CreditCard, ShoppingBag, Coffee, Car, Smartphone, Activity } from 'lucide-react';
+import { formatINR } from '../../utils/helpers';
 
 export function CreditCards() {
     const [isFlipped, setIsFlipped] = useState(false);

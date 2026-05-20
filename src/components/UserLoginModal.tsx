@@ -51,7 +51,7 @@ export function UserLoginModal({ onClose, onLogin }: UserLoginModalProps) {
                     </div>
                     <button
                         className="w-full rounded-lg bg-emerald-600 text-white px-3 py-2"
-                        onClick={() => onLogin({ id: uid, name })}
+                        onClick={() => onLogin({ id: uid, name, services: [] })}
                     >
                         Login
                     </button>

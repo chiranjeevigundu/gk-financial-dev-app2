@@ -282,12 +282,12 @@ export function Forex() {
                                                 </div>
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <span className="font-bold text-slate-800 text-lg">{req.fromCurrency}</span>
+                                                        <span className="font-bold text-slate-800 text-lg">{req.details?.fromCurrency || ''}</span>
                                                         <ArrowRight className="w-4 h-4 text-slate-300" />
-                                                        <span className="font-bold text-slate-800 text-lg">{req.toCurrency}</span>
+                                                        <span className="font-bold text-slate-800 text-lg">{req.details?.toCurrency || ''}</span>
                                                     </div>
                                                     <div className="font-black text-2xl text-slate-900 tracking-tight">
-                                                        {req.amount.toLocaleString()} <span className="text-sm font-bold text-slate-400">{req.fromCurrency}</span>
+                                                        {(req.details?.amount || 0).toLocaleString()} <span className="text-sm font-bold text-slate-400">{req.details?.fromCurrency || ''}</span>
                                                     </div>
                                                     <p className="text-xs text-slate-400 font-mono mt-1">ID: {req.id} • {req.date}</p>
                                                 </div>

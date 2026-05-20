@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useGlobal } from '../../context/GlobalContext';
 import { formatINR } from '../../utils/helpers';
-import { Wallet, TrendingUp, CheckCircle, Calculator, Percent, ArrowRight } from 'lucide-react';
+import { Wallet, TrendingUp, CheckCircle } from 'lucide-react';
 
 export function PersonalLoans() {
     const { user, userFinance, addUserRequest } = useGlobal();

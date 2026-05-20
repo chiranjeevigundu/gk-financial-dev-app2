@@ -12,8 +12,8 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build the application using vite directly to skip tsc checks
-RUN npx vite build
+# Build the application with strict type checking
+RUN npm run build
 
 # Production stage
 FROM nginx:stable-alpine

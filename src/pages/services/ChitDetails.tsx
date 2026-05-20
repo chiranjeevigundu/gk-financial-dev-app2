@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useGlobal } from '../../context/GlobalContext';
 import { formatINR } from '../../utils/helpers';
 import { List, CheckCircle, Clock } from 'lucide-react';

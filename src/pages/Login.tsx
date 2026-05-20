@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useGlobal } from '../context/GlobalContext';
 import { LogIn, User, Lock, ArrowRight, Mail, Phone, ShieldCheck } from 'lucide-react';
 

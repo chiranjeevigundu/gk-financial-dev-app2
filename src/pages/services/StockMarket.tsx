@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, Activity, BarChart3, LineChart, PieChart, ArrowUpRight, ArrowDownRight, RefreshCw, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { TrendingUp, Activity, ArrowUpRight, ArrowDownRight, RefreshCw, Zap } from 'lucide-react';
 
 export function StockMarket() {
     const [selectedRange, setSelectedRange] = useState('1M');

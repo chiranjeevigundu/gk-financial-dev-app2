@@ -1,11 +1,9 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
 import { useGlobal } from '../../context/GlobalContext';
 import { Lock } from 'lucide-react';
 
 export function RequireAuth({ children }: { children: React.JSX.Element }) {
     const { user, setShowLoginModal } = useGlobal();
-    const location = useLocation();
 
     if (!user) {
         return (

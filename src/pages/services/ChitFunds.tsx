@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useGlobal } from '../../context/GlobalContext';
 import { formatINR, isTop1Bidder } from '../../utils/helpers';
 import { TimerDigits } from '../../components/TimerDigits';
@@ -7,11 +6,10 @@ import type { Bidder } from '../../types';
 import { Users, AlertCircle, Info, Calendar, Landmark, ArrowDownRight, TrendingDown, Key, Clock, Activity } from 'lucide-react';
 
 export function ChitFunds() {
-    const navigate = useNavigate();
     const { user, adminUser, auctionConfig, auctionState, setAuctionState, canBid, batches } = useGlobal();
 
     const { dateMonth, chitValue, ticker, roomCode, activeBatchId, activeBatchName, minLoss, lastBid, joinedUsers, joinedUsersList } = auctionConfig;
-    const { bidders, currentLoss, running, finished } = auctionState;
+    const { bidders, running } = auctionState;
 
     const [roomInput, setRoomInput] = useState("");
     const [joined, setJoined] = useState(false);
